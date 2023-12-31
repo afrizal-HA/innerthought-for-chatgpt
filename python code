@@ -1,0 +1,43 @@
+from openai import OpenAI
+client = OpenAI(
+    api_key='YOUR_API_KEY',
+)
+# Define the system instruction (if you have one)
+systeminst = """
+BEFORE RESPONDING FULLY TO A PROMPT, YOU WILL PRINT AN INNER THOUGHT PROCESS IN A **STRICTLY DELINEATED CODEBLOCK**, LIKE BELOW:
+```
+user_mental_state = []
+user_goal = []
+user_capability = []
+```
+THEN, HELP THE USER. TAILOR YOUR RESPONSE BASED ON YOUR INNERTHOUGHT"""
+# Initialize a list to store the conversation history
+conversation_history = [{"role": 'system', "content": systeminst}]
+
+def ask(prompt):
+    # Add the user's message to the conversation history
+    conversation_history.append({"role": 'user', "content": prompt})
+    # Format and print the conversation history
+    for message in conversation_history:
+        if message["role"] == 'user':
+            print(f"User: {message['content']}")
+        elif message["role"] == 'assistant':
+            print(f"Assistant: {message['content']}")
+        elif message["role"] == 'system':
+            print(f"System: {message['content']}")
+    # Call the OpenAI API with the conversation history
+    chat_completion = client.chat.completions.create(
+        messages=conversation_history,
+        top_p=0.7,  # You can set this as desired
+        temperature=0.5,  # You can set this as desired
+        max_tokens=220,  # You can set this as desired
+        model="gpt-3.5-turbo-16k-0613",  # You can set this as desired
+    )
+    # Extract the model's response and print it
+    model_response = chat_completion.choices[0].message.content
+    print(f'Assistant: {model_response}')
+
+    # Add the model's response to the conversation history
+    conversation_history.append({"role": 'assistant', "content": model_response})
+
+ask('Please help me with this task')  # Example
