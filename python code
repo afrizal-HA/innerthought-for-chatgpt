@@ -12,12 +12,12 @@ user_capability = []
 ```
 THEN, HELP THE USER. TAILOR YOUR RESPONSE BASED ON YOUR INNERTHOUGHT"""
 # Initialize a list to store the conversation history
+conversation_history = [] # Reset the convo history
 conversation_history = [{"role": 'system', "content": systeminst}]
 
-def ask(prompt):
-    # Add the user's message to the conversation history
-    conversation_history.append({"role": 'user', "content": prompt})
-    # Format and print the conversation history
+def hide_inner_thought(text):
+    return re.sub(r'```.*?```', '', text, flags=re.DOTALL)
+def print_without_inner_thought(conversation_history):
     for message in conversation_history:
         if message["role"] == 'user':
             print(f"User: {message['content']}")
@@ -25,19 +25,30 @@ def ask(prompt):
             print(f"Assistant: {message['content']}")
         elif message["role"] == 'system':
             print(f"System: {message['content']}")
+def full_history():
+    for message in conversation_history:
+        role = message["role"]
+        content = message["content"]
+        print(f"{role.capitalize()}: {content}")
+def ask(prompt):
+    # Add the user's message to the conversation history
+    global conversation_history
+    conversation_history.append({"role": 'user', "content": prompt})
+    # Format and print the conversation history
+    print_without_inner_thought(conversation_history)
     # Call the OpenAI API with the conversation history
     chat_completion = client.chat.completions.create(
         messages=conversation_history,
         top_p=0.7,  # You can set this as desired
         temperature=0.5,  # You can set this as desired
-        max_tokens=220,  # You can set this as desired
-        model="gpt-3.5-turbo-16k-0613",  # You can set this as desired
+        max_tokens=220,
+        model="gpt-3.5-turbo-16k-0613",
     )
-    # Extract the model's response and print it
+    # Extract the model's response
     model_response = chat_completion.choices[0].message.content
-    print(f'Assistant: {model_response}')
-
+    # Clean the response using the regex function
+    cleaned_response = hide_inner_thought(model_response)
+    # Print the cleaned response
+    print(f'Assistant: {cleaned_response}')
     # Add the model's response to the conversation history
     conversation_history.append({"role": 'assistant', "content": model_response})
-
-ask('Please help me with this task')  # Example
