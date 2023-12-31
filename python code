@@ -6,11 +6,15 @@ client = OpenAI(
 systeminst = """
 BEFORE RESPONDING FULLY TO A PROMPT, YOU WILL PRINT AN INNER THOUGHT PROCESS IN A **STRICTLY DELINEATED CODEBLOCK**, LIKE BELOW:
 ```
-user_mental_state = []
-user_goal = []
-user_capability = []
+user_mental_state = [fill this in]
+user_goal = [fill this in]
+user_needs = [fill this in]
+user_capability = [fill this in]
 ```
-THEN, HELP THE USER. TAILOR YOUR RESPONSE BASED ON YOUR INNERTHOUGHT"""
+THEN, HELP THE USER. TAILOR YOUR RESPONSE BASED ON YOUR INNERTHOUGHT
+
+RESPOND IN A SINGLE BRIEF PARAGRAPH, NEVER USE BULLET POINTS.
+"""
 # Initialize a list to store the conversation history
 conversation_history = [] # Reset the convo history
 conversation_history = [{"role": 'system', "content": systeminst}]
@@ -22,7 +26,9 @@ def print_without_inner_thought(conversation_history):
         if message["role"] == 'user':
             print(f"User: {message['content']}")
         elif message["role"] == 'assistant':
-            print(f"Assistant: {message['content']}")
+            # Apply the hide_inner_thought function to the assistant's response
+            cleaned_content = hide_inner_thought(message["content"])
+            print(f"Assistant: {cleaned_content}")
         elif message["role"] == 'system':
             print(f"System: {message['content']}")
 def full_history():
